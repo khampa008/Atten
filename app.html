@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+    <style>
+        :root {
+            --primary: #4a6cf7;
+            --primary-dark: #3a5ae8;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --bg: #f5f7ff;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --border: #e0e0e0;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --overlay: rgba(0, 0, 0, 0.5);
+        }
+
+        .dark-mode {
+            --primary: #5d78ff;
+            --primary-dark: #4a6cf7;
+            --secondary: #a0aec0;
+            --bg: #1a202c;
+            --card-bg: #2d3748;
+            --text: #e2e8f0;
+            --border: #4a5568;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --overlay: rgba(0, 0, 0, 0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            margin-bottom: 1rem;
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .app-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .view {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+        }
+
+        .view.active {
+            display: flex;
+        }
+
+        .btn {
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+        }
+
+        .theme-toggle {
+            background-color: var(--card-bg);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .form-container {
+            max-width: 500px;
+            margin: 2rem auto;
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px var(--shadow);
+            border: 1px solid var(--border);
+            width: 100%;
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: var(--card-bg);
+            color: var(--text);
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-footer {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .subject-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px var(--shadow);
+            border: 1px solid var(--border);
+            transition: transform 0.2s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .subject-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .subject-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            color: white;
+        }
+
+        .subject-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .attendance-percentage {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background-color: var(--border);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress {
+            height: 100%;
+            border-radius: 5px;
+        }
+
+        .attendance-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+
+        .subject-view-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .back-button {
+            background-color: var(--card-bg);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+
+        .student-list {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin-top: 1rem;
+        }
+
+        .student-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .student-item:last-child {
+            border-bottom: none;
+        }
+
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            margin-right: 1rem;
+        }
+
+        .student-name {
+            flex: 1;
+            font-weight: 500;
+        }
+
+        .attendance-toggle {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .toggle-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .present-btn {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .present-btn.active {
+            border-color: white;
+        }
+
+        .absent-btn {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .absent-btn.active {
+            border-color: white;
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 1.5rem 0;
+            margin-top: 1rem;
+        }
+
+        .date-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .date-display {
+            font-weight: 600;
+            background-color: var(--card-bg);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--success);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px var(--shadow);
+            display: none;
+            z-index: 1000;
+        }
+
+        .role-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 1.5rem;
+            background-color: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .role-btn.active {
+            border-color: var(--primary);
+            background-color: rgba(74, 108, 247, 0.1);
+        }
+
+        .role-btn i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .role-btn h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .student-dashboard {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .attendance-summary {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .summary-card .value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0.5rem 0;
+        }
+
+        .summary-card .label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .subject-attendance {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .subject-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .subject-card-student {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px var(--shadow);
+            border: 1px solid var(--border);
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .attendance-history {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .history-table th {
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .history-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-present {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .status-absent {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .admin-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .students-list {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .admin-table th {
+            font-weight: 600;
+            color: var(--secondary);
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .admin-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .admin-table tr:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+
+        .action-cell {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .student-form-container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(20px); }
+            20% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(20px); }
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 1.5rem;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-bar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .subject-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .role-selector {
+                flex-direction: column;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-title {
+                font-size: 1.2rem;
+            }
+            
+            .form-title {
+                font-size: 1.5rem;
+            }
+            
+            .subject-view-header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .date-selector {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .admin-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="app-title">
+                <div class="app-icon">📝</div>
+                <span>Attendance Tracker</span>
+            </div>
+            <div class="theme-toggle" id="themeToggle">
+                🌙
+            </div>
+        </header>
+
+        <!-- Role Selection View -->
+        <div class="view active" id="roleView">
+            <div class="form-container">
+                <h1 class="form-title">Select Your Role</h1>
+                <div class="role-selector">
+                    <div class="role-btn active" id="teacherRole">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                        <h3>Teacher</h3>
+                        <p>Take attendance and manage classes</p>
+                    </div>
+                    <div class="role-btn" id="studentRole">
+                        <i class="fas fa-user-graduate"></i>
+                        <h3>Student</h3>
+                        <p>View your attendance records</p>
+                    </div>
+                    <div class="role-btn" id="adminRole">
+                        <i class="fas fa-user-shield"></i>
+                        <h3>Admin</h3>
+                        <p>Manage student accounts</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary" id="continueBtn" style="width: 100%; margin-top: 1.5rem;">Continue</button>
+            </div>
+        </div>
+
+        <!-- Teacher Login View -->
+        <div class="view" id="loginView">
+            <div class="form-container">
+                <h1 class="form-title">Teacher Login</h1>
+                <div class="form-group">
+                    <label for="username">Username or Mobile</label>
+                    <input type="text" id="username" class="form-control" placeholder="Enter username or mobile">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="Enter password">
+                </div>
+                <button class="btn btn-primary" id="loginBtn" style="width: 100%;">Login</button>
+                <div class="form-footer">
+                    <p>Don't have an account? <span class="link" id="showRegister">Register</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teacher Register View -->
+        <div class="view" id="registerView">
+            <div class="form-container">
+                <h1 class="form-title">Teacher Registration</h1>
+                <div class="form-group">
+                    <label for="regUsername">Username</label>
+                    <input type="text" id="regUsername" class="form-control" placeholder="Choose a username">
+                </div>
+                <div class="form-group">
+                    <label for="regMobile">Mobile Number</label>
+                    <input type="tel" id="regMobile" class="form-control" placeholder="Enter mobile number">
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Password</label>
+                    <input type="password" id="regPassword" class="form-control" placeholder="Create password">
+                </div>
+                <div class="form-group">
+                    <label for="regConfirmPassword">Confirm Password</label>
+                    <input type="password" id="regConfirmPassword" class="form-control" placeholder="Confirm password">
+                </div>
+                <button class="btn btn-primary" id="registerBtn" style="width: 100%;">Register</button>
+                <div class="form-footer">
+                    <p>Already have an account? <span class="link" id="showLogin">Login</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teacher Dashboard View -->
+        <div class="view" id="dashboardView">
+            <h1>Your Subjects</h1>
+            <div class="dashboard-grid" id="subjectGrid">
+                <!-- Subject cards will be populated here -->
+            </div>
+        </div>
+
+        <!-- Teacher Subject View -->
+        <div class="view" id="subjectView">
+            <div class="subject-view-header">
+                <div class="back-button" id="backToDashboard">
+                    ←
+                </div>
+                <h1 id="subjectName">Python Programming</h1>
+            </div>
+            
+            <div class="date-selector">
+                <label for="attendanceDate">Select Date:</label>
+                <input type="date" id="attendanceDate" class="form-control">
+                <div class="date-display" id="currentDateDisplay">Today: 2023-10-15</div>
+            </div>
+            
+            <div class="student-list" id="studentList">
+                <!-- Student list will be populated here -->
+            </div>
+            
+            <div class="action-bar">
+                <button class="btn btn-outline" id="markAllPresent">Mark All Present</button>
+                <button class="btn btn-primary" id="saveAttendance">Save Attendance</button>
+            </div>
+        </div>
+
+        <!-- Student Login View -->
+        <div class="view" id="studentLoginView">
+            <div class="form-container">
+                <h1 class="form-title">Student Login</h1>
+                <div class="form-group">
+                    <label for="studentId">Student ID</label>
+                    <input type="text" id="studentId" class="form-control" placeholder="Enter your student ID">
+                </div>
+                <div class="form-group">
+                    <label for="studentPin">PIN</label>
+                    <input type="password" id="studentPin" class="form-control" placeholder="Enter your PIN">
+                </div>
+                <button class="btn btn-primary" id="studentLoginBtn" style="width: 100%;">View Attendance</button>
+                <div class="form-footer">
+                    <p>Forgot your PIN? Contact your admin</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Dashboard View -->
+        <div class="view" id="studentDashboardView">
+            <div class="student-dashboard">
+                <div class="summary-header">
+                    <h1>Your Attendance Summary</h1>
+                    <div class="date-display" id="studentDateDisplay">As of 2023-10-15</div>
+                </div>
+                
+                <div class="attendance-summary">
+                    <h2><i class="fas fa-chart-line"></i> Overall Attendance</h2>
+                    <div class="summary-cards">
+                        <div class="summary-card">
+                            <div class="value" id="overallPercentage">85%</div>
+                            <div class="label">Overall Attendance</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="value" id="presentCount">42</div>
+                            <div class="label">Days Present</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="value" id="absentCount">8</div>
+                            <div class="label">Days Absent</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="subject-attendance">
+                    <h2><i class="fas fa-book"></i> By Subject</h2>
+                    <div class="subject-list" id="subjectList">
+                        <!-- Subject attendance cards will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="attendance-history">
+                    <h2><i class="fas fa-history"></i> Recent Attendance</h2>
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Subject</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceHistory">
+                            <!-- Attendance history will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Login View -->
+        <div class="view" id="adminLoginView">
+            <div class="form-container">
+                <h1 class="form-title">Admin Login</h1>
+                <div class="form-group">
+                    <label for="adminUsername">Username</label>
+                    <input type="text" id="adminUsername" class="form-control" placeholder="Enter admin username">
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">Password</label>
+                    <input type="password" id="adminPassword" class="form-control" placeholder="Enter admin password">
+                </div>
+                <button class="btn btn-primary" id="adminLoginBtn" style="width: 100%;">Login</button>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard View -->
+        <div class="view" id="adminDashboardView">
+            <div class="admin-panel">
+                <div class="admin-header">
+                    <h1>Student Management</h1>
+                    <div class="admin-actions">
+                        <button class="btn btn-primary" id="addStudentBtn">
+                            <i class="fas fa-plus"></i> Add Student
+                        </button>
+                        <button class="btn btn-outline" id="refreshStudents">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="student-form-container" id="studentFormContainer" style="display: none;">
+                    <h2 id="formTitle">Add New Student</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentName">Full Name</label>
+                            <input type="text" id="studentName" class="form-control" placeholder="Enter student's full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="studentEmail">Email</label>
+                            <input type="email" id="studentEmail" class="form-control" placeholder="Enter student email">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentClass">Class</label>
+                            <input type="text" id="studentClass" class="form-control" placeholder="Enter class/grade">
+                        </div>
+                        <div class="form-group">
+                            <label for="studentRoll">Roll Number</label>
+                            <input type="text" id="studentRoll" class="form-control" placeholder="Enter roll number">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentPinAdmin">PIN (4 digits)</label>
+                        <input type="password" id="studentPinAdmin" class="form-control" placeholder="Create PIN" maxlength="4">
+                    </div>
+                    <div class="action-bar">
+                        <button class="btn btn-outline" id="cancelStudentForm">Cancel</button>
+                        <button class="btn btn-primary" id="saveStudent">Save Student</button>
+                    </div>
+                </div>
+                
+                <div class="students-list">
+                    <h2><i class="fas fa-users"></i> Student List</h2>
+                    <div class="table-container">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Class</th>
+                                    <th>Roll No</th>
+                                    <th>Email</th>
+                                    <th>PIN</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminStudentList">
+                                <!-- Student list will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification -->
+        <div class="notification" id="notification">Attendance saved successfully!</div>
+    </div>
+
+    <script>
+        // App data and state
+        const appData = {
+            currentUser: null,
+            currentStudent: null,
+            currentAdmin: null,
+            subjects: [
+                { id: 1, name: "Python programming", color: "#4a6cf7", icon: "∫" },
+                { id: 2, name: "Major", color: "#28a745", icon: "🔬" },
+                { id: 3, name: "Minor", color: "#dc3545", icon: "📚" },
+                { id: 4, name: "MDC", color: "#ffc107", icon: "📜" },
+                { id: 5, name: "AEC", color: "#17a2b8", icon: "🌍" },
+                { id: 6, name: "VAC", color: "#e83e8c", icon: "🎨" }
+            ],
+            students: [
+                { id: 1, name: "Alex Johnson", email: "alex@school.edu", class: "10A", roll: "101", pin: "1234" },
+                { id: 2, name: "Taylor Smith", email: "taylor@school.edu", class: "10A", roll: "102", pin: "2345" },
+                { id: 3, name: "Jordan Williams", email: "jordan@school.edu", class: "10B", roll: "201", pin: "3456" },
+                { id: 4, name: "Morgan Brown", email: "morgan@school.edu", class: "10B", roll: "202", pin: "4567" },
+                { id: 5, name: "Casey Davis", email: "casey@school.edu", class: "11A", roll: "301", pin: "5678" }
+            ],
+            attendanceRecords: [],
+            admins: [
+                { username: "admin", password: "admin123" }
+            ],
+            editingStudentId: null
+        };
+
+        // DOM Elements
+        const views = {
+            role: document.getElementById('roleView'),
+            login: document.getElementById('loginView'),
+            register: document.getElementById('registerView'),
+            dashboard: document.getElementById('dashboardView'),
+            subject: document.getElementById('subjectView'),
+            studentLogin: document.getElementById('studentLoginView'),
+            studentDashboard: document.getElementById('studentDashboardView'),
+            adminLogin: document.getElementById('adminLoginView'),
+            adminDashboard: document.getElementById('adminDashboardView')
+        };
+        
+        const themeToggle = document.getElementById('themeToggle');
+        const showRegister = document.getElementById('showRegister');
+        const showLogin = document.getElementById('showLogin');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const subjectGrid = document.getElementById('subjectGrid');
+        const backToDashboard = document.getElementById('backToDashboard');
+        const subjectName = document.getElementById('subjectName');
+        const studentList = document.getElementById('studentList');
+        const markAllPresent = document.getElementById('markAllPresent');
+        const saveAttendance = document.getElementById('saveAttendance');
+        const attendanceDate = document.getElementById('attendanceDate');
+        const currentDateDisplay = document.getElementById('currentDateDisplay');
+        const notification = document.getElementById('notification');
+        const teacherRole = document.getElementById('teacherRole');
+        const studentRole = document.getElementById('studentRole');
+        const adminRole = document.getElementById('adminRole');
+        const continueBtn = document.getElementById('continueBtn');
+        const studentLoginBtn = document.getElementById('studentLoginBtn');
+        const subjectList = document.getElementById('subjectList');
+        const attendanceHistory = document.getElementById('attendanceHistory');
+        const overallPercentage = document.getElementById('overallPercentage');
+        const presentCount = document.getElementById('presentCount');
+        const absentCount = document.getElementById('absentCount');
+        const studentDateDisplay = document.getElementById('studentDateDisplay');
+        const adminLoginBtn = document.getElementById('adminLoginBtn');
+        const adminStudentList = document.getElementById('adminStudentList');
+        const addStudentBtn = document.getElementById('addStudentBtn');
+        const studentFormContainer = document.getElementById('studentFormContainer');
+        const cancelStudentForm = document.getElementById('cancelStudentForm');
+        const saveStudent = document.getElementById('saveStudent');
+        const formTitle = document.getElementById('formTitle');
+        const refreshStudents = document.getElementById('refreshStudents');
+
+        // Current state
+        let currentSubjectId = null;
+        let currentAttendance = {};
+        let isDarkMode = false;
+        let currentRole = "teacher";
+
+        // Initialize the app
+        function initApp() {
+            // Set current date
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            attendanceDate.value = formattedDate;
+            currentDateDisplay.textContent = `Today: ${formattedDate}`;
+            studentDateDisplay.textContent = `As of ${formattedDate}`;
+            
+            // Load demo attendance records
+            generateDemoAttendanceRecords();
+            
+            // Render admin student list
+            renderAdminStudentList();
+            
+            // Set up event listeners
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            // Theme toggle
+            themeToggle.addEventListener('click', toggleDarkMode);
+            
+            // Navigation
+            showRegister.addEventListener('click', () => switchView('register'));
+            showLogin.addEventListener('click', () => switchView('login'));
+            loginBtn.addEventListener('click', handleTeacherLogin);
+            registerBtn.addEventListener('click', handleTeacherRegister);
+            backToDashboard.addEventListener('click', () => switchView('dashboard'));
+            
+            // Attendance actions
+            markAllPresent.addEventListener('click', markAllStudentsPresent);
+            saveAttendance.addEventListener('click', saveCurrentAttendance);
+            attendanceDate.addEventListener('change', loadAttendanceForDate);
+            
+            // Role selection
+            teacherRole.addEventListener('click', () => {
+                teacherRole.classList.add('active');
+                studentRole.classList.remove('active');
+                adminRole.classList.remove('active');
+                currentRole = "teacher";
+            });
+            
+            studentRole.addEventListener('click', () => {
+                studentRole.classList.add('active');
+                teacherRole.classList.remove('active');
+                adminRole.classList.remove('active');
+                currentRole = "student";
+            });
+            
+            adminRole.addEventListener('click', () => {
+                adminRole.classList.add('active');
+                teacherRole.classList.remove('active');
+                studentRole.classList.remove('active');
+                currentRole = "admin";
+            });
+            
+            continueBtn.addEventListener('click', () => {
+                if (currentRole === "teacher") {
+                    switchView('login');
+                } else if (currentRole === "student") {
+                    switchView('studentLogin');
+                } else if (currentRole === "admin") {
+                    switchView('adminLogin');
+                }
+            });
+            
+            // Student login
+            studentLoginBtn.addEventListener('click', handleStudentLogin);
+            
+            // Admin login
+            adminLoginBtn.addEventListener('click', handleAdminLogin);
+            
+            // Student management
+            addStudentBtn.addEventListener('click', showStudentForm);
+            cancelStudentForm.addEventListener('click', hideStudentForm);
+            saveStudent.addEventListener('click', saveStudentData);
+            refreshStudents.addEventListener('click', renderAdminStudentList);
+        }
+
+        function switchView(viewName) {
+            // Hide all views
+            Object.values(views).forEach(view => view.classList.remove('active'));
+            
+            // Show the requested view
+            views[viewName].classList.add('active');
+            
+            // Update content if needed
+            if (viewName === 'dashboard') {
+                renderSubjectCards();
+            } else if (viewName === 'studentDashboard') {
+                renderStudentDashboard();
+            } else if (viewName === 'adminDashboard') {
+                renderAdminStudentList();
+            }
+        }
+
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
+        function handleTeacherLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Simple validation
+            if (!username || !password) {
+                showNotification('Please enter both username and password');
+                return;
+            }
+            
+            // For demo purposes, just log in
+            appData.currentUser = {
+                username: username,
+                mobile: "123-456-7890" // Demo value
+            };
+            
+            switchView('dashboard');
+        }
+
+        function handleTeacherRegister() {
+            const username = document.getElementById('regUsername').value;
+            const mobile = document.getElementById('regMobile').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            
+            // Validation
+            if (!username || !mobile || !password) {
+                showNotification('Please fill in all fields');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showNotification('Passwords do not match');
+                return;
+            }
+            
+            // For demo, just log in
+            appData.currentUser = {
+                username: username,
+                mobile: mobile
+            };
+            
+            switchView('dashboard');
+        }
+
+        function handleStudentLogin() {
+            const studentId = document.getElementById('studentId').value;
+            const pin = document.getElementById('studentPin').value;
+            
+            // Simple validation
+            if (!studentId || !pin) {
+                showNotification('Please enter both Student ID and PIN');
+                return;
+            }
+            
+            // Find student
+            const student = appData.students.find(s => s.id == studentId);
+            
+            if (!student) {
+                showNotification('Student not found');
+                return;
+            }
+            
+            if (student.pin !== pin) {
+                showNotification('Incorrect PIN');
+                return;
+            }
+            
+            appData.currentStudent = student;
+            switchView('studentDashboard');
+        }
+
+        function handleAdminLogin() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            // Simple validation
+            if (!username || !password) {
+                showNotification('Please enter both username and password');
+                return;
+            }
+            
+            // Find admin
+            const admin = appData.admins.find(a => a.username === username && a.password === password);
+            
+            if (!admin) {
+                showNotification('Invalid admin credentials');
+                return;
+            }
+            
+            appData.currentAdmin = admin;
+            switchView('adminDashboard');
+        }
+
+        function renderSubjectCards() {
+            subjectGrid.innerHTML = '';
+            
+            appData.subjects.forEach(subject => {
+                // Calculate attendance stats for demo
+                const records = appData.attendanceRecords.filter(r => r.subjectId === subject.id);
+                const totalClasses = records.length;
+                
+                // Count present students for each class and average
+                let totalPresent = 0;
+                records.forEach(record => {
+                    Object.values(record.attendance).forEach(present => {
+                        if (present) totalPresent++;
+                    });
+                });
+                
+                const averageAttendance = totalClasses > 0 ? Math.round((totalPresent / (totalClasses * appData.students.length)) * 100) : 0;
+                
+                const card = document.createElement('div');
+                card.className = 'subject-card';
+                card.innerHTML = `
+                    <div class="subject-header">
+                        <div class="subject-icon" style="background-color: ${subject.color}">${subject.icon}</div>
+                        <div class="subject-title">${subject.name}</div>
+                    </div>
+                    <div class="attendance-percentage">${averageAttendance}%</div>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: ${averageAttendance}%; background-color: ${subject.color}"></div>
+                    </div>
+                    <div class="attendance-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">${totalClasses}</div>
+                            <div class="stat-label">Classes Held</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${Math.round(averageAttendance/100 * totalClasses)}</div>
+                            <div class="stat-label">Avg. Attendance</div>
+                        </div>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => openSubject(subject.id));
+                subjectGrid.appendChild(card);
+            });
+        }
+
+        function openSubject(subjectId) {
+            currentSubjectId = subjectId;
+            const subject = appData.subjects.find(s => s.id === subjectId);
+            subjectName.textContent = subject.name;
+            switchView('subject');
+            loadAttendanceForDate();
+        }
+
+        function loadAttendanceForDate() {
+            const date = attendanceDate.value;
+            currentDateDisplay.textContent = `Selected: ${date}`;
+            
+            // Find existing attendance record for this date and subject
+            const existingRecord = appData.attendanceRecords.find(
+                r => r.subjectId === currentSubjectId && r.date === date
+            );
+            
+            if (existingRecord) {
+                currentAttendance = {...existingRecord.attendance};
+            } else {
+                // Initialize with all present
+                currentAttendance = {};
+                appData.students.forEach(student => {
+                    currentAttendance[student.id] = true;
+                });
+            }
+            
+            renderStudentList();
+        }
+
+        function renderStudentList() {
+            studentList.innerHTML = '';
+            
+            appData.students.forEach(student => {
+                const isPresent = currentAttendance[student.id];
+                
+                const item = document.createElement('div');
+                item.className = 'student-item';
+                item.innerHTML = `
+                    <div class="student-avatar">${student.name.charAt(0)}</div>
+                    <div class="student-name">${student.name}</div>
+                    <div class="attendance-toggle">
+                        <button class="toggle-btn present-btn ${isPresent ? 'active' : ''}" 
+                                data-student-id="${student.id}" data-status="true">Present</button>
+                        <button class="toggle-btn absent-btn ${!isPresent ? 'active' : ''}" 
+                                data-student-id="${student.id}" data-status="false">Absent</button>
+                    </div>
+                `;
+                
+                studentList.appendChild(item);
+            });
+            
+            // Add event listeners to the toggle buttons
+            document.querySelectorAll('.present-btn, .absent-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const studentId = parseInt(this.dataset.studentId);
+                    const status = this.dataset.status === 'true';
+                    
+                    // Update the attendance status
+                    currentAttendance[studentId] = status;
+                    
+                    // Update UI
+                    const parent = this.parentElement;
+                    parent.querySelector('.present-btn').classList.toggle('active', status);
+                    parent.querySelector('.absent-btn').classList.toggle('active', !status);
+                });
+            });
+        }
+
+        function markAllStudentsPresent() {
+            appData.students.forEach(student => {
+                currentAttendance[student.id] = true;
+            });
+            renderStudentList();
+        }
+
+        function saveCurrentAttendance() {
+            const date = attendanceDate.value;
+            
+            // Remove existing record if exists
+            appData.attendanceRecords = appData.attendanceRecords.filter(
+                r => !(r.subjectId === currentSubjectId && r.date === date)
+            );
+            
+            // Add new record
+            appData.attendanceRecords.push({
+                subjectId: currentSubjectId,
+                date: date,
+                attendance: {...currentAttendance}
+            });
+            
+            showNotification('Attendance saved successfully!');
+        }
+
+        function renderStudentDashboard() {
+            if (!appData.currentStudent) return;
+            
+            const student = appData.currentStudent;
+            
+            // Calculate overall attendance
+            let totalDays = 0;
+            let presentDays = 0;
+            
+            appData.attendanceRecords.forEach(record => {
+                totalDays++;
+                if (record.attendance[student.id]) {
+                    presentDays++;
+                }
+            });
+            
+            const absentDays = totalDays - presentDays;
+            const percentage = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 0;
+            
+            // Update summary cards
+            overallPercentage.textContent = `${percentage}%`;
+            presentCount.textContent = presentDays;
+            absentCount.textContent = absentDays;
+            
+            // Render subject attendance
+            renderSubjectAttendance(student);
+            
+            // Render recent attendance history
+            renderAttendanceHistory(student);
+        }
+
+        function renderSubjectAttendance(student) {
+            subjectList.innerHTML = '';
+            
+            appData.subjects.forEach(subject => {
+                // Filter records for this subject
+                const records = appData.attendanceRecords.filter(r => r.subjectId === subject.id);
+                const totalClasses = records.length;
+                let attendedClasses = 0;
+                
+                records.forEach(record => {
+                    if (record.attendance[student.id]) {
+                        attendedClasses++;
+                    }
+                });
+                
+                const percentage = totalClasses > 0 ? Math.round((attendedClasses / totalClasses) * 100) : 0;
+                
+                // Determine progress bar color
+                let progressColor = '';
+                if (percentage >= 90) progressColor = 'var(--success)';
+                else if (percentage >= 75) progressColor = 'var(--warning)';
+                else progressColor = 'var(--danger)';
+                
+                const card = document.createElement('div');
+                card.className = 'subject-card-student';
+                card.innerHTML = `
+                    <div class="subject-header">
+                        <div class="subject-icon" style="background-color: ${subject.color}">${subject.icon}</div>
+                        <div>
+                            <div class="subject-title">${subject.name}</div>
+                            <div>${attendedClasses} of ${totalClasses} classes</div>
+                        </div>
+                    </div>
+                    <div class="attendance-percentage">${percentage}%</div>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: ${percentage}%; background-color: ${progressColor}"></div>
+                    </div>
+                    <div class="attendance-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">${attendedClasses}</div>
+                            <div class="stat-label">Present</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${totalClasses - attendedClasses}</div>
+                            <div class="stat-label">Absent</div>
+                        </div>
+                    </div>
+                `;
+                
+                subjectList.appendChild(card);
+            });
+        }
+
+        function renderAttendanceHistory(student) {
+            attendanceHistory.innerHTML = '';
+            
+            // Get recent records (last 10)
+            const recentRecords = [...appData.attendanceRecords]
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 10);
+            
+            if (recentRecords.length === 0) {
+                attendanceHistory.innerHTML = '<tr><td colspan="3" style="text-align: center;">No attendance records yet</td></tr>';
+                return;
+            }
+            
+            recentRecords.forEach(record => {
+                const subject = appData.subjects.find(s => s.id === record.subjectId);
+                const isPresent = record.attendance[student.id];
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.date}</td>
+                    <td>${subject ? subject.name : 'Unknown'}</td>
+                    <td class="${isPresent ? 'status-present' : 'status-absent'}">
+                        ${isPresent ? 'Present' : 'Absent'}
+                    </td>
+                `;
+                
+                attendanceHistory.appendChild(row);
+            });
+        }
+
+        function renderAdminStudentList() {
+            adminStudentList.innerHTML = '';
+            
+            if (appData.students.length === 0) {
+                adminStudentList.innerHTML = '<tr><td colspan="7" style="text-align: center;">No students found</td></tr>';
+                return;
+            }
+            
+            appData.students.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td>${student.class}</td>
+                    <td>${student.roll}</td>
+                    <td>${student.email}</td>
+                    <td>${student.pin}</td>
+                    <td class="action-cell">
+                        <button class="btn btn-warning btn-icon edit-student" data-id="${student.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-icon delete-student" data-id="${student.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                adminStudentList.appendChild(row);
+            });
+            
+            // Add event listeners
+            document.querySelectorAll('.edit-student').forEach(btn => {
+                btn.addEventListener('click', () => editStudent(parseInt(btn.dataset.id)));
+            });
+            
+            document.querySelectorAll('.delete-student').forEach(btn => {
+                btn.addEventListener('click', () => deleteStudent(parseInt(btn.dataset.id)));
+            });
+        }
+
+        function showStudentForm() {
+            // Reset form
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentEmail').value = '';
+            document.getElementById('studentClass').value = '';
+            document.getElementById('studentRoll').value = '';
+            document.getElementById('studentPinAdmin').value = '';
+            formTitle.textContent = 'Add New Student';
+            appData.editingStudentId = null;
+            
+            studentFormContainer.style.display = 'block';
+        }
+
+        function hideStudentForm() {
+            studentFormContainer.style.display = 'none';
+        }
+
+        function editStudent(studentId) {
+            const student = appData.students.find(s => s.id === studentId);
+            if (!student) return;
+            
+            document.getElementById('studentName').value = student.name;
+            document.getElementById('studentEmail').value = student.email;
+            document.getElementById('studentClass').value = student.class;
+            document.getElementById('studentRoll').value = student.roll;
+            document.getElementById('studentPinAdmin').value = student.pin;
+            
+            formTitle.textContent = 'Edit Student';
+            appData.editingStudentId = studentId;
+            
+            studentFormContainer.style.display = 'block';
+        }
+
+        function saveStudentData() {
+            const name = document.getElementById('studentName').value;
+            const email = document.getElementById('studentEmail').value;
+            const studentClass = document.getElementById('studentClass').value;
+            const roll = document.getElementById('studentRoll').value;
+            const pin = document.getElementById('studentPinAdmin').value;
+            
+            // Validation
+            if (!name || !email || !studentClass || !roll || !pin) {
+                showNotification('Please fill in all fields');
+                return;
+            }
+            
+            if (pin.length !== 4 || isNaN(pin)) {
+                showNotification('PIN must be 4 digits');
+                return;
+            }
+            
+            if (appData.editingStudentId) {
+                // Update existing student
+                const student = appData.students.find(s => s.id === appData.editingStudentId);
+                if (student) {
+                    student.name = name;
+                    student.email = email;
+                    student.class = studentClass;
+                    student.roll = roll;
+                    student.pin = pin;
+                    showNotification('Student updated successfully');
+                }
+            } else {
+                // Create new student
+                const newId = appData.students.length > 0 
+                    ? Math.max(...appData.students.map(s => s.id)) + 1 
+                    : 1;
+                
+                appData.students.push({
+                    id: newId,
+                    name: name,
+                    email: email,
+                    class: studentClass,
+                    roll: roll,
+                    pin: pin
+                });
+                
+                showNotification('Student added successfully');
+            }
+            
+            // Refresh list and hide form
+            renderAdminStudentList();
+            hideStudentForm();
+        }
+
+        function deleteStudent(studentId) {
+            if (confirm('Are you sure you want to delete this student?')) {
+                appData.students = appData.students.filter(s => s.id !== studentId);
+                showNotification('Student deleted successfully');
+                renderAdminStudentList();
+            }
+        }
+
+        function generateDemoAttendanceRecords() {
+            // Generate demo attendance records for the last 30 days
+            const today = new Date();
+            const studentIds = appData.students.map(s => s.id);
+            
+            for (let i = 0; i < 30; i++) {
+                const date = new Date();
+                date.setDate(today.getDate() - i);
+                const formattedDate = date.toISOString().split('T')[0];
+                
+                // Each day has 2-4 subjects
+                const subjectCount = Math.floor(Math.random() * 3) + 2;
+                const selectedSubjects = [...appData.subjects]
+                    .sort(() => 0.5 - Math.random())
+                    .slice(0, subjectCount);
+                
+                selectedSubjects.forEach(subject => {
+                    const attendance = {};
+                    
+                    studentIds.forEach(studentId => {
+                        // 85% chance of being present
+                        attendance[studentId] = Math.random() < 0.85;
+                    });
+                    
+                    appData.attendanceRecords.push({
+                        subjectId: subject.id,
+                        date: formattedDate,
+                        attendance: attendance
+                    });
+                });
+            }
+        }
+
+        function showNotification(message) {
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
